@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+    <ViewDefinitions>
+        <!-- UTCM.Monitor Table View -->
+        <View>
+            <Name>UTCM.Monitor.TableView</Name>
+            <ViewSelectedBy>
+                <TypeName>UTCM.Monitor</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>DisplayName</Label>
+                        <Width>30</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Status</Label>
+                        <Width>10</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Mode</Label>
+                        <Width>12</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Frequency</Label>
+                        <Width>10</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>LastModified</Label>
+                        <Width>20</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Id</Label>
+                        <Width>36</Width>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>DisplayName</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Status</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Mode</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>"$($_.MonitorRunFrequencyInHours)h"</ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>if ($_.LastModifiedDateTime) { $_.LastModifiedDateTime.ToString("yyyy-MM-dd HH:mm") } else { "-" }</ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Id</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+
+        <!-- UTCM.Monitor List View -->
+        <View>
+            <Name>UTCM.Monitor.ListView</Name>
+            <ViewSelectedBy>
+                <TypeName>UTCM.Monitor</TypeName>
+            </ViewSelectedBy>
+            <ListControl>
+                <ListEntries>
+                    <ListEntry>
+                        <ListItems>
+                            <ListItem>
+                                <Label>Id</Label>
+                                <PropertyName>Id</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Display Name</Label>
+                                <PropertyName>DisplayName</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Description</Label>
+                                <PropertyName>Description</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Status</Label>
+                                <PropertyName>Status</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Mode</Label>
+                                <PropertyName>Mode</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Run Frequency</Label>
+                                <ScriptBlock>"Every $($_.MonitorRunFrequencyInHours) hours"</ScriptBlock>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Tenant Id</Label>
+                                <PropertyName>TenantId</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Created</Label>
+                                <PropertyName>CreatedDateTime</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Last Modified</Label>
+                                <PropertyName>LastModifiedDateTime</PropertyName>
+                            </ListItem>
+                        </ListItems>
+                    </ListEntry>
+                </ListEntries>
+            </ListControl>
+        </View>
+
+        <!-- UTCM.Drift Table View -->
+        <View>
+            <Name>UTCM.Drift.TableView</Name>
+            <ViewSelectedBy>
+                <TypeName>UTCM.Drift</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>ResourceType</Label>
+                        <Width>25</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>ResourceName</Label>
+                        <Width>30</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Status</Label>
+                        <Width>8</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>FirstReported</Label>
+                        <Width>20</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>DriftedProps</Label>
+                        <Width>12</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Id</Label>
+                        <Width>36</Width>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>ResourceType</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>BaselineResourceDisplayName</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Status</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>if ($_.FirstReportedDateTime) { $_.FirstReportedDateTime.ToString("yyyy-MM-dd HH:mm") } else { "-" }</ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>if ($_.DriftedProperties) { $_.DriftedProperties.Count } else { 0 }</ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Id</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+
+        <!-- UTCM.Drift List View -->
+        <View>
+            <Name>UTCM.Drift.ListView</Name>
+            <ViewSelectedBy>
+                <TypeName>UTCM.Drift</TypeName>
+            </ViewSelectedBy>
+            <ListControl>
+                <ListEntries>
+                    <ListEntry>
+                        <ListItems>
+                            <ListItem>
+                                <Label>Id</Label>
+                                <PropertyName>Id</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Monitor Id</Label>
+                                <PropertyName>MonitorId</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Resource Type</Label>
+                                <PropertyName>ResourceType</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Resource Name</Label>
+                                <PropertyName>BaselineResourceDisplayName</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Status</Label>
+                                <PropertyName>Status</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>First Reported</Label>
+                                <PropertyName>FirstReportedDateTime</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Tenant Id</Label>
+                                <PropertyName>TenantId</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Drifted Properties</Label>
+                                <ScriptBlock>($_.DriftedProperties | ForEach-Object { $_.propertyName }) -join ", "</ScriptBlock>
+                            </ListItem>
+                        </ListItems>
+                    </ListEntry>
+                </ListEntries>
+            </ListControl>
+        </View>
+
+        <!-- UTCM.SnapshotJob Table View -->
+        <View>
+            <Name>UTCM.SnapshotJob.TableView</Name>
+            <ViewSelectedBy>
+                <TypeName>UTCM.SnapshotJob</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>DisplayName</Label>
+                        <Width>25</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Status</Label>
+                        <Width>18</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Created</Label>
+                        <Width>20</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Completed</Label>
+                        <Width>20</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Resources</Label>
+                        <Width>10</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Id</Label>
+                        <Width>36</Width>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>DisplayName</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Status</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>if ($_.CreatedDateTime) { $_.CreatedDateTime.ToString("yyyy-MM-dd HH:mm") } else { "-" }</ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>if ($_.CompletedDateTime) { $_.CompletedDateTime.ToString("yyyy-MM-dd HH:mm") } else { "-" }</ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>if ($_.Resources) { $_.Resources.Count } else { 0 }</ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Id</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+
+        <!-- UTCM.SnapshotJob List View -->
+        <View>
+            <Name>UTCM.SnapshotJob.ListView</Name>
+            <ViewSelectedBy>
+                <TypeName>UTCM.SnapshotJob</TypeName>
+            </ViewSelectedBy>
+            <ListControl>
+                <ListEntries>
+                    <ListEntry>
+                        <ListItems>
+                            <ListItem>
+                                <Label>Id</Label>
+                                <PropertyName>Id</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Display Name</Label>
+                                <PropertyName>DisplayName</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Description</Label>
+                                <PropertyName>Description</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Status</Label>
+                                <PropertyName>Status</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Tenant Id</Label>
+                                <PropertyName>TenantId</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Created</Label>
+                                <PropertyName>CreatedDateTime</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Completed</Label>
+                                <PropertyName>CompletedDateTime</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Resources</Label>
+                                <ScriptBlock>if ($_.Resources) { $_.Resources -join ", " } else { "-" }</ScriptBlock>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Resource Location</Label>
+                                <PropertyName>ResourceLocation</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Errors</Label>
+                                <ScriptBlock>if ($_.ErrorDetails) { $_.ErrorDetails -join "; " } else { "-" }</ScriptBlock>
+                            </ListItem>
+                        </ListItems>
+                    </ListEntry>
+                </ListEntries>
+            </ListControl>
+        </View>
+
+        <!-- UTCM.Baseline List View -->
+        <View>
+            <Name>UTCM.Baseline.ListView</Name>
+            <ViewSelectedBy>
+                <TypeName>UTCM.Baseline</TypeName>
+            </ViewSelectedBy>
+            <ListControl>
+                <ListEntries>
+                    <ListEntry>
+                        <ListItems>
+                            <ListItem>
+                                <Label>Id</Label>
+                                <PropertyName>Id</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Display Name</Label>
+                                <PropertyName>DisplayName</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Description</Label>
+                                <PropertyName>Description</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Resource Count</Label>
+                                <ScriptBlock>if ($_.Resources) { $_.Resources.Count } else { 0 }</ScriptBlock>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Resources</Label>
+                                <ScriptBlock>if ($_.Resources) { ($_.Resources | ForEach-Object { $_.resourceType }) -join ", " } else { "-" }</ScriptBlock>
+                            </ListItem>
+                        </ListItems>
+                    </ListEntry>
+                </ListEntries>
+            </ListControl>
+        </View>
+
+        <!-- UTCM.SupportedWorkload Table View -->
+        <View>
+            <Name>UTCM.SupportedWorkload.TableView</Name>
+            <ViewSelectedBy>
+                <TypeName>UTCM.SupportedWorkload</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>Workload</Label>
+                        <Width>25</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Description</Label>
+                        <Width>50</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Resource Types</Label>
+                        <Width>40</Width>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>Workload</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Description</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>$_.ResourceTypes -join ", "</ScriptBlock>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>
