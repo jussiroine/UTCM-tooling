@@ -35,9 +35,10 @@
     
     # Functions to export from this module
     FunctionsToExport = @(
-        # Authentication
+        # Authentication & Diagnostics
         'Connect-UTCM',
         'Disconnect-UTCM',
+        'Test-UTCMAvailability',
         'Initialize-UTCMServicePrincipal',
         'Grant-UTCMPermission',
         

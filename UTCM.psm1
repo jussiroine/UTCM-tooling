@@ -149,6 +149,9 @@ function Invoke-UTCMGraphRequest {
                 $errorMessage = $_.ErrorDetails.Message
             }
         }
+        elseif ($_.Exception.Response) {
+            $errorMessage = "HTTP $($_.Exception.Response.StatusCode): $($_.Exception.Response.ReasonPhrase)"
+        }
         throw "Graph API request failed: $errorMessage"
     }
 }
@@ -307,9 +310,20 @@ function Connect-UTCM {
     .PARAMETER ClientSecretCredential
         PSCredential object containing the client secret for app-only authentication.
 
+    .PARAMETER UseDeviceCode
+        Uses device code authentication instead of interactive browser. Useful for embedded terminals.
+
     .EXAMPLE
         Connect-UTCM
         Connects using interactive authentication with default UTCM permissions.
+
+    .EXAMPLE
+        Connect-UTCM -UseDeviceCode
+        Connects using device code authentication (useful in embedded terminals).
+
+    .EXAMPLE
+        Connect-UTCM -AccessToken $token
+        Connects using a pre-obtained access token.
 
     .EXAMPLE
         Connect-UTCM -TenantId "contoso.onmicrosoft.com"
@@ -327,6 +341,12 @@ function Connect-UTCM {
         [Parameter()]
         [string]$TenantId,
         
+        [Parameter(ParameterSetName = 'Interactive')]
+        [switch]$UseDeviceCode,
+        
+        [Parameter(ParameterSetName = 'AccessToken', Mandatory)]
+        [securestring]$AccessToken,
+        
         [Parameter(ParameterSetName = 'AppOnly', Mandatory)]
         [Parameter(ParameterSetName = 'AppOnlySecret', Mandatory)]
         [string]$ClientId,
@@ -340,7 +360,9 @@ function Connect-UTCM {
     
     # Build the required scopes
     $requiredScopes = @(
-        $script:UTCMPermissions.ReadWrite
+        $script:UTCMPermissions.ReadWrite,
+        'Application.ReadWrite.All',
+        'AppRoleAssignment.ReadWrite.All'
     )
     
     if ($Scopes) {
@@ -356,6 +378,9 @@ function Connect-UTCM {
     switch ($PSCmdlet.ParameterSetName) {
         'Interactive' {
             $connectParams['Scopes'] = $requiredScopes
+            if ($UseDeviceCode) {
+                $connectParams['UseDeviceCode'] = $true
+            }
         }
         'AppOnly' {
             $connectParams['ClientId'] = $ClientId
@@ -365,11 +390,14 @@ function Connect-UTCM {
             $connectParams['ClientId'] = $ClientId
             $connectParams['ClientSecretCredential'] = $ClientSecretCredential
         }
+        'AccessToken' {
+            $connectParams['AccessToken'] = $AccessToken
+        }
     }
     
     try {
         Write-Verbose "Connecting to Microsoft Graph..."
-        Connect-MgGraph @connectParams
+        Connect-MgGraph @connectParams -NoWelcome
         
         $context = Get-MgContext
         Write-Host "Connected to Microsoft Graph" -ForegroundColor Green
@@ -399,6 +427,171 @@ function Disconnect-UTCM {
     
     Disconnect-MgGraph
     Write-Host "Disconnected from Microsoft Graph" -ForegroundColor Yellow
+}
+
+function Test-UTCMAvailability {
+    <#
+    .SYNOPSIS
+        Tests if the UTCM API is available in your tenant.
+
+    .DESCRIPTION
+        Performs diagnostic checks to verify that the Unified Tenant Configuration Management
+        (UTCM) API is accessible in your tenant. This includes checking:
+        - Microsoft Graph connection
+        - UTCM service principal existence
+        - UTCM API endpoint accessibility
+        - Required permissions
+
+    .EXAMPLE
+        Test-UTCMAvailability
+        Runs all diagnostic checks and reports the results.
+
+    .EXAMPLE
+        Test-UTCMAvailability -Verbose
+        Runs diagnostics with detailed output.
+    #>
+    [CmdletBinding()]
+    param()
+    
+    $results = [ordered]@{
+        GraphConnection     = $false
+        ServicePrincipal    = $false
+        UTCMApiAvailable    = $false
+        RequiredPermissions = $false
+    }
+    
+    Write-Host "`n=== UTCM Availability Diagnostics ===`n" -ForegroundColor Cyan
+    
+    # Check 1: Graph Connection
+    Write-Host "[1/4] Checking Microsoft Graph connection..." -ForegroundColor Yellow
+    try {
+        $context = Get-MgContext
+        if ($context) {
+            $results.GraphConnection = $true
+            Write-Host "  [PASS] Connected as: $($context.Account)" -ForegroundColor Green
+            Write-Host "         Tenant: $($context.TenantId)" -ForegroundColor Gray
+        }
+        else {
+            Write-Host "  [FAIL] Not connected to Microsoft Graph" -ForegroundColor Red
+            Write-Host "         Run: Connect-UTCM" -ForegroundColor Gray
+        }
+    }
+    catch {
+        Write-Host "  [FAIL] $($_.Exception.Message)" -ForegroundColor Red
+    }
+    
+    # Check 2: Service Principal
+    Write-Host "`n[2/4] Checking UTCM service principal..." -ForegroundColor Yellow
+    if ($results.GraphConnection) {
+        try {
+            $sp = Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/v1.0/servicePrincipals?`$filter=appId eq '$($script:UTCMAppId)'" -Method GET
+            if ($sp.value -and $sp.value.Count -gt 0) {
+                $results.ServicePrincipal = $true
+                Write-Host "  [PASS] UTCM service principal exists" -ForegroundColor Green
+                Write-Host "         Object ID: $($sp.value[0].id)" -ForegroundColor Gray
+                Write-Host "         Display Name: $($sp.value[0].displayName)" -ForegroundColor Gray
+            }
+            else {
+                Write-Host "  [FAIL] UTCM service principal not found" -ForegroundColor Red
+                Write-Host "         Run: Initialize-UTCMServicePrincipal" -ForegroundColor Gray
+            }
+        }
+        catch {
+            Write-Host "  [FAIL] Could not query service principals: $($_.Exception.Message)" -ForegroundColor Red
+        }
+    }
+    else {
+        Write-Host "  [SKIP] Requires Graph connection" -ForegroundColor Gray
+    }
+    
+    # Check 3: UTCM API Availability
+    Write-Host "`n[3/4] Checking UTCM API availability..." -ForegroundColor Yellow
+    if ($results.GraphConnection) {
+        try {
+            $uri = "$($script:GraphBetaUri)$($script:UTCMEndpoints.Monitors)"
+            Write-Verbose "Testing endpoint: $uri"
+            $response = Invoke-MgGraphRequest -Uri $uri -Method GET -ErrorAction Stop
+            $results.UTCMApiAvailable = $true
+            Write-Host "  [PASS] UTCM API is accessible" -ForegroundColor Green
+            $monitorCount = if ($response.value) { $response.value.Count } else { 0 }
+            Write-Host "         Current monitors: $monitorCount" -ForegroundColor Gray
+        }
+        catch {
+            $errorMsg = $_.Exception.Message
+            if ($_.ErrorDetails.Message) {
+                try {
+                    $errorDetails = $_.ErrorDetails.Message | ConvertFrom-Json
+                    $errorMsg = $errorDetails.error.message
+                }
+                catch { }
+            }
+            
+            Write-Host "  [FAIL] UTCM API is not available" -ForegroundColor Red
+            Write-Host "         Error: $errorMsg" -ForegroundColor Gray
+            Write-Host "`n         This typically means:" -ForegroundColor Yellow
+            Write-Host "         - Your tenant is not enrolled in the UTCM preview" -ForegroundColor Gray
+            Write-Host "         - UTCM may not be available in your region yet" -ForegroundColor Gray
+            Write-Host "         - Check: https://learn.microsoft.com/graph/utcm-authentication-setup" -ForegroundColor Cyan
+        }
+    }
+    else {
+        Write-Host "  [SKIP] Requires Graph connection" -ForegroundColor Gray
+    }
+    
+    # Check 4: Required Permissions
+    Write-Host "`n[4/4] Checking required permissions..." -ForegroundColor Yellow
+    if ($results.GraphConnection) {
+        $context = Get-MgContext
+        $requiredScopes = @('ConfigurationMonitoring.Read.All', 'ConfigurationMonitoring.ReadWrite.All')
+        $hasPermission = $false
+        
+        foreach ($scope in $requiredScopes) {
+            if ($context.Scopes -contains $scope) {
+                $hasPermission = $true
+                break
+            }
+        }
+        
+        if ($hasPermission) {
+            $results.RequiredPermissions = $true
+            Write-Host "  [PASS] Required UTCM permissions present" -ForegroundColor Green
+            $utcmScopes = $context.Scopes | Where-Object { $_ -match 'ConfigurationMonitoring' }
+            foreach ($s in $utcmScopes) {
+                Write-Host "         - $s" -ForegroundColor Gray
+            }
+        }
+        else {
+            Write-Host "  [WARN] Missing UTCM-specific permissions" -ForegroundColor Yellow
+            Write-Host "         Required: ConfigurationMonitoring.Read.All or .ReadWrite.All" -ForegroundColor Gray
+            Write-Host "         Current scopes: $($context.Scopes -join ', ')" -ForegroundColor Gray
+        }
+    }
+    else {
+        Write-Host "  [SKIP] Requires Graph connection" -ForegroundColor Gray
+    }
+    
+    # Summary
+    Write-Host "`n=== Summary ===" -ForegroundColor Cyan
+    $allPassed = $results.Values | Where-Object { $_ -eq $true }
+    $passCount = if ($allPassed) { $allPassed.Count } else { 0 }
+    
+    if ($passCount -eq 4) {
+        Write-Host "All checks passed! UTCM is ready to use." -ForegroundColor Green
+    }
+    elseif ($results.UTCMApiAvailable -eq $false -and $results.GraphConnection) {
+        Write-Host "UTCM API is not available in your tenant." -ForegroundColor Red
+        Write-Host "`nTo enable UTCM:" -ForegroundColor Yellow
+        Write-Host "1. Ensure your tenant is enrolled in the UTCM public preview" -ForegroundColor White
+        Write-Host "2. Visit: https://learn.microsoft.com/graph/utcm-authentication-setup" -ForegroundColor Cyan
+        Write-Host "3. Contact Microsoft support if you believe UTCM should be available" -ForegroundColor White
+    }
+    else {
+        Write-Host "$passCount of 4 checks passed. See details above." -ForegroundColor Yellow
+    }
+    
+    Write-Host ""
+    
+    return [PSCustomObject]$results
 }
 
 function Initialize-UTCMServicePrincipal {
@@ -1404,9 +1597,10 @@ function New-UTCMBaselineTemplate {
 
 # Export module members
 Export-ModuleMember -Function @(
-    # Authentication
+    # Authentication & Diagnostics
     'Connect-UTCM',
     'Disconnect-UTCM',
+    'Test-UTCMAvailability',
     'Initialize-UTCMServicePrincipal',
     'Grant-UTCMPermission',
     

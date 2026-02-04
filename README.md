@@ -14,9 +14,32 @@ A PowerShell module for interacting with Microsoft Graph Unified Tenant Configur
 - PowerShell 5.1 or later (PowerShell 7+ recommended)
 - [Microsoft.Graph.Authentication](https://www.powershellgallery.com/packages/Microsoft.Graph.Authentication) module (v2.0.0+)
 - Microsoft 365 tenant with appropriate admin permissions
+- **UTCM Preview Enrollment** (see below)
 - Required Graph permissions:
   - `ConfigurationMonitoring.Read.All` (for read operations)
   - `ConfigurationMonitoring.ReadWrite.All` (for write operations)
+  - `Application.ReadWrite.All` (for service principal setup)
+  - `AppRoleAssignment.ReadWrite.All` (for granting permissions)
+
+### UTCM Preview Enrollment
+
+> **Important:** UTCM is currently in **public preview** and requires enrollment before the API becomes available in your tenant.
+
+To check if UTCM is available in your tenant:
+
+```powershell
+Connect-UTCM
+Test-UTCMAvailability
+```
+
+If the UTCM API is not available, you may need to:
+
+1. **Enroll in the preview program** - Visit the [Microsoft 365 Admin Center](https://admin.microsoft.com) and check for preview features
+2. **Check regional availability** - UTCM may not be available in all regions during preview
+3. **Verify licensing** - Certain Microsoft 365 licenses may be required
+4. **Contact Microsoft Support** - If you believe UTCM should be available for your tenant
+
+For more information, see the [UTCM Authentication Setup](https://learn.microsoft.com/en-us/graph/utcm-authentication-setup) documentation.
 
 ## Installation
 
@@ -51,7 +74,14 @@ Connect-UTCM
 Connect-UTCM -TenantId "contoso.onmicrosoft.com"
 ```
 
-### 2. Initial Setup (First Time Only)
+### 2. Check UTCM Availability
+
+```powershell
+# Verify UTCM is available in your tenant
+Test-UTCMAvailability
+```
+
+### 3. Initial Setup (First Time Only)
 
 ```powershell
 # Create the UTCM service principal in your tenant
@@ -61,7 +91,7 @@ Initialize-UTCMServicePrincipal
 Grant-UTCMPermission -Permissions @('User.Read.All', 'Policy.Read.All', 'Directory.Read.All')
 ```
 
-### 3. Create a Configuration Monitor
+### 4. Create a Configuration Monitor
 
 ```powershell
 # Using a baseline template
@@ -71,14 +101,14 @@ New-UTCMBaselineTemplate -Template ConditionalAccess -OutputPath ".\ca-baseline.
 New-UTCMMonitor -DisplayName "CA Policy Monitor" -BaselineJson ".\ca-baseline.json"
 ```
 
-### 4. Check for Drifts
+### 5. Check for Drifts
 
 ```powershell
 # List all active drifts
 Get-UTCMDrift -Status active
 ```
 
-### 5. Create a Snapshot
+### 6. Create a Snapshot
 
 ```powershell
 $monitor = Get-UTCMMonitor | Select-Object -First 1
@@ -93,6 +123,7 @@ New-UTCMSnapshot -MonitorId $monitor.Id -DisplayName "Weekly Backup"
 |--------|-------------|
 | `Connect-UTCM` | Connects to Microsoft Graph with UTCM permissions |
 | `Disconnect-UTCM` | Disconnects from Microsoft Graph |
+| `Test-UTCMAvailability` | Checks if UTCM API is available in your tenant |
 | `Initialize-UTCMServicePrincipal` | Adds the UTCM service principal to your tenant |
 | `Grant-UTCMPermission` | Grants permissions to the UTCM service principal |
 
