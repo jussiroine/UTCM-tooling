@@ -1,0 +1,53 @@
+{
+    "displayName": "Microsoft Teams Policy Baseline",
+    "description": "Monitor Microsoft Teams meeting and messaging policies",
+    "resources": [
+        {
+            "resourceType": "teamsMeetingPolicy",
+            "displayName": "Global Meeting Policy",
+            "resourceInstanceIdentifier": {
+                "identity": "Global"
+            },
+            "properties": [
+                {
+                    "name": "allowTranscription",
+                    "expectedValue": true
+                },
+                {
+                    "name": "allowCloudRecording",
+                    "expectedValue": true
+                },
+                {
+                    "name": "allowAnonymousUsersToJoinMeeting",
+                    "expectedValue": false
+                },
+                {
+                    "name": "allowExternalParticipantGiveRequestControl",
+                    "expectedValue": false
+                }
+            ]
+        },
+        {
+            "resourceType": "teamsMessagingPolicy",
+            "displayName": "Global Messaging Policy",
+            "resourceInstanceIdentifier": {
+                "identity": "Global"
+            },
+            "properties": [
+                {
+                    "name": "allowUrlPreviews",
+                    "expectedValue": true
+                },
+                {
+                    "name": "allowGiphy",
+                    "expectedValue": true
+                },
+                {
+                    "name": "giphyRatingType",
+                    "expectedValue": "Moderate"
+                }
+            ]
+        }
+    ],
+    "parameters": []
+}

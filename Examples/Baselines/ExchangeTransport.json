@@ -1,0 +1,37 @@
+{
+    "displayName": "Exchange Transport Rules Baseline",
+    "description": "Monitor Exchange Online transport rules for mail flow security",
+    "resources": [
+        {
+            "resourceType": "transportRule",
+            "displayName": "External Email Warning",
+            "resourceInstanceIdentifier": {
+                "name": "External Email Warning"
+            },
+            "properties": [
+                {
+                    "name": "state",
+                    "expectedValue": "Enabled"
+                },
+                {
+                    "name": "priority",
+                    "expectedValue": 0
+                }
+            ]
+        },
+        {
+            "resourceType": "transportRule",
+            "displayName": "Block Auto-Forward to External",
+            "resourceInstanceIdentifier": {
+                "name": "Block Auto-Forward to External"
+            },
+            "properties": [
+                {
+                    "name": "state",
+                    "expectedValue": "Enabled"
+                }
+            ]
+        }
+    ],
+    "parameters": []
+}

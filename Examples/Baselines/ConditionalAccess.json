@@ -1,0 +1,45 @@
+{
+    "displayName": "Conditional Access Baseline",
+    "description": "Monitor Conditional Access policy configuration for compliance",
+    "resources": [
+        {
+            "resourceType": "conditionalAccessPolicy",
+            "displayName": "Block Legacy Authentication",
+            "resourceInstanceIdentifier": {
+                "displayName": "Block Legacy Authentication"
+            },
+            "properties": [
+                {
+                    "name": "state",
+                    "expectedValue": "enabled"
+                },
+                {
+                    "name": "conditions.clientAppTypes",
+                    "expectedValue": ["exchangeActiveSync", "other"]
+                },
+                {
+                    "name": "grantControls.builtInControls",
+                    "expectedValue": ["block"]
+                }
+            ]
+        },
+        {
+            "resourceType": "conditionalAccessPolicy",
+            "displayName": "Require MFA for Admins",
+            "resourceInstanceIdentifier": {
+                "displayName": "Require MFA for Admins"
+            },
+            "properties": [
+                {
+                    "name": "state",
+                    "expectedValue": "enabled"
+                },
+                {
+                    "name": "grantControls.builtInControls",
+                    "expectedValue": ["mfa"]
+                }
+            ]
+        }
+    ],
+    "parameters": []
+}
