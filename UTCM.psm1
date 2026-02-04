@@ -28,9 +28,9 @@ $script:GraphBetaUri = 'https://graph.microsoft.com/beta'
 
 # UTCM API endpoints
 $script:UTCMEndpoints = @{
-    Monitors      = '/tenantConfiguration/monitors'
-    Drifts        = '/tenantConfiguration/drifts'
-    SnapshotJobs  = '/tenantConfiguration/snapshotJobs'
+    Monitors      = '/admin/configurationManagement/configurationMonitors'
+    Drifts        = '/admin/configurationManagement/configurationDrifts'
+    SnapshotJobs  = '/admin/configurationManagement/configurationSnapshotJobs'
 }
 
 # Required permissions for UTCM
@@ -1510,6 +1510,8 @@ function New-UTCMBaselineTemplate {
         [string]$OutputPath
     )
     
+    # UTCM baseline properties use flat object format: { propertyName: expectedValue }
+    # See: https://learn.microsoft.com/en-us/graph/utcm-entra-resources
     $templates = @{
         ConditionalAccess = @{
             displayName = "Conditional Access Baseline"
@@ -1518,13 +1520,15 @@ function New-UTCMBaselineTemplate {
                 @{
                     resourceType = "conditionalAccessPolicy"
                     displayName = "CA Policy Monitor"
-                    properties = @(
-                        @{ name = "state"; expectedValue = "enabled" }
-                        @{ name = "conditions"; expectedValue = $null }
-                        @{ name = "grantControls"; expectedValue = $null }
-                    )
+                    resourceInstanceIdentifier = @{
+                        DisplayName = "Example CA Policy"
+                    }
+                    properties = @{
+                        State = "enabled"
+                    }
                 }
             )
+            parameters = @()
         }
         ExchangeTransport = @{
             displayName = "Exchange Transport Rules Baseline"
@@ -1533,12 +1537,15 @@ function New-UTCMBaselineTemplate {
                 @{
                     resourceType = "transportRule"
                     displayName = "Transport Rule Monitor"
-                    properties = @(
-                        @{ name = "state"; expectedValue = "Enabled" }
-                        @{ name = "priority"; expectedValue = $null }
-                    )
+                    resourceInstanceIdentifier = @{
+                        name = "Example Transport Rule"
+                    }
+                    properties = @{
+                        State = "Enabled"
+                    }
                 }
             )
+            parameters = @()
         }
         TeamsPolicy = @{
             displayName = "Teams Policy Baseline"
@@ -1547,12 +1554,16 @@ function New-UTCMBaselineTemplate {
                 @{
                     resourceType = "teamsMeetingPolicy"
                     displayName = "Meeting Policy Monitor"
-                    properties = @(
-                        @{ name = "allowTranscription"; expectedValue = $null }
-                        @{ name = "allowRecording"; expectedValue = $null }
-                    )
+                    resourceInstanceIdentifier = @{
+                        identity = "Global"
+                    }
+                    properties = @{
+                        AllowTranscription = $true
+                        AllowCloudRecording = $true
+                    }
                 }
             )
+            parameters = @()
         }
         IntuneCompliance = @{
             displayName = "Intune Compliance Baseline"
@@ -1561,11 +1572,15 @@ function New-UTCMBaselineTemplate {
                 @{
                     resourceType = "deviceCompliancePolicy"
                     displayName = "Compliance Policy Monitor"
-                    properties = @(
-                        @{ name = "scheduledActionsForRule"; expectedValue = $null }
-                    )
+                    resourceInstanceIdentifier = @{
+                        DisplayName = "Example Compliance Policy"
+                    }
+                    properties = @{
+                        PasswordRequired = $true
+                    }
                 }
             )
+            parameters = @()
         }
         SecurityDefaults = @{
             displayName = "Security Defaults Baseline"
@@ -1574,11 +1589,15 @@ function New-UTCMBaselineTemplate {
                 @{
                     resourceType = "securityDefaults"
                     displayName = "Security Defaults Monitor"
-                    properties = @(
-                        @{ name = "isEnabled"; expectedValue = $true }
-                    )
+                    resourceInstanceIdentifier = @{
+                        IsSingleInstance = "Yes"
+                    }
+                    properties = @{
+                        IsEnabled = $true
+                    }
                 }
             )
+            parameters = @()
         }
     }
     

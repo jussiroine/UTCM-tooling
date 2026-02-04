@@ -6,39 +6,24 @@
             "resourceType": "conditionalAccessPolicy",
             "displayName": "Block Legacy Authentication",
             "resourceInstanceIdentifier": {
-                "displayName": "Block Legacy Authentication"
+                "DisplayName": "Block Legacy Authentication"
             },
-            "properties": [
-                {
-                    "name": "state",
-                    "expectedValue": "enabled"
-                },
-                {
-                    "name": "conditions.clientAppTypes",
-                    "expectedValue": ["exchangeActiveSync", "other"]
-                },
-                {
-                    "name": "grantControls.builtInControls",
-                    "expectedValue": ["block"]
-                }
-            ]
+            "properties": {
+                "State": "enabled",
+                "BuiltInControls": ["block"],
+                "ClientAppTypes": ["exchangeActiveSync", "other"]
+            }
         },
         {
             "resourceType": "conditionalAccessPolicy",
             "displayName": "Require MFA for Admins",
             "resourceInstanceIdentifier": {
-                "displayName": "Require MFA for Admins"
+                "DisplayName": "Require MFA for Admins"
             },
-            "properties": [
-                {
-                    "name": "state",
-                    "expectedValue": "enabled"
-                },
-                {
-                    "name": "grantControls.builtInControls",
-                    "expectedValue": ["mfa"]
-                }
-            ]
+            "properties": {
+                "State": "enabled",
+                "BuiltInControls": ["mfa"]
+            }
         }
     ],
     "parameters": []

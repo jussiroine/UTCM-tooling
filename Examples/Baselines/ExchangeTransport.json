@@ -8,16 +8,10 @@
             "resourceInstanceIdentifier": {
                 "name": "External Email Warning"
             },
-            "properties": [
-                {
-                    "name": "state",
-                    "expectedValue": "Enabled"
-                },
-                {
-                    "name": "priority",
-                    "expectedValue": 0
-                }
-            ]
+            "properties": {
+                "State": "Enabled",
+                "Priority": 0
+            }
         },
         {
             "resourceType": "transportRule",
@@ -25,12 +19,9 @@
             "resourceInstanceIdentifier": {
                 "name": "Block Auto-Forward to External"
             },
-            "properties": [
-                {
-                    "name": "state",
-                    "expectedValue": "Enabled"
-                }
-            ]
+            "properties": {
+                "State": "Enabled"
+            }
         }
     ],
     "parameters": []
